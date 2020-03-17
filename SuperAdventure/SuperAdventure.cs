@@ -30,9 +30,13 @@ namespace SuperAdventure
                 _player = Player.CreateDefaultPlayer();
             }
 
+            lblHitPoints.DataBindings.Add("Text", _player, "CurrentHitPoints");
+            lblGold.DataBindings.Add("Text", _player, "Gold");
+            lblExperience.DataBindings.Add("Text", _player, "ExperiencePoints");
+            lblLevel.DataBindings.Add("Text", _player, "Level");
+
             MoveTo(_player.CurrentLocation);
 
-            UpdatePlayerStats();
         }
         private void BtnNorth_Click(object sender, EventArgs e)
         {
@@ -79,8 +83,6 @@ namespace SuperAdventure
             // Completely heal the player
             _player.CurrentHitPoints = _player.MaximumHitPoints;
 
-            // Update Hit Points in UI
-            lblHitPoints.Text = _player.CurrentHitPoints.ToString();
 
             // Does the new location have a quest?
             if (newLocation.QuestAvailableHere != null)
@@ -116,7 +118,7 @@ namespace SuperAdventure
                             rtbMessages.Text += Environment.NewLine;
                             ScrollToBottomOfMessages();
 
-                            _player.ExperiencePoints += newLocation.QuestAvailableHere.RewardExperiencePoints;
+                            _player.AddExperiencePoints(newLocation.QuestAvailableHere.RewardExperiencePoints);
                             _player.Gold += newLocation.QuestAvailableHere.RewardGold;
 
                             // Add the reward item to the player's inventory
@@ -187,8 +189,6 @@ namespace SuperAdventure
                 btnUsePotion.Visible = false;
             }
 
-            // Refresh player's stats
-            UpdatePlayerStats();
 
             // Refresh player's inventory list
             UpdateInventoryListInUI();
@@ -263,11 +263,20 @@ namespace SuperAdventure
             }
             else
             {
+                cboWeapons.SelectedIndexChanged -= cboWeapons_SelectedIndexChanged;
                 cboWeapons.DataSource = weapons;
+                cboWeapons.SelectedIndexChanged += cboWeapons_SelectedIndexChanged;
                 cboWeapons.DisplayMember = "Name";
                 cboWeapons.ValueMember = "ID";
 
-                cboWeapons.SelectedIndex = 0;
+                if (_player.CurrentWeapon != null)
+                {
+                    cboWeapons.SelectedItem = _player.CurrentWeapon;
+                } 
+                else
+                {
+                    cboWeapons.SelectedIndex = 0;
+                }
             }
         }
 
@@ -326,7 +335,7 @@ namespace SuperAdventure
                 ScrollToBottomOfMessages();
 
                 // Give player experience points for killing the monster
-                _player.ExperiencePoints += _currentMonster.RewardExperiencePoints;
+                _player.AddExperiencePoints(_currentMonster.RewardExperiencePoints);
                 rtbMessages.Text += "You receive " + _currentMonster.RewardExperiencePoints.ToString() + " experience points." + Environment.NewLine;
                 ScrollToBottomOfMessages();
 
@@ -377,7 +386,6 @@ namespace SuperAdventure
                 }
 
                 // Refresh player information and inventory controls
-                UpdatePlayerStats();
                 UpdateInventoryListInUI();
                 UpdateWeaponListInUI();
                 UpdatePotionsListInUI();
@@ -403,8 +411,6 @@ namespace SuperAdventure
                 // Subtract damage from player
                 _player.CurrentHitPoints -= damageToPlayer;
 
-                // Refresh player data in UI
-                lblHitPoints.Text = _player.CurrentHitPoints.ToString();
 
                 if (_player.CurrentHitPoints <= 0)
                 {
@@ -458,8 +464,6 @@ namespace SuperAdventure
             // Subtract damage from player
             _player.CurrentHitPoints -= damageToPlayer;
 
-            // Refresh player data in UI
-            lblHitPoints.Text = _player.CurrentHitPoints.ToString();
 
             if (_player.CurrentHitPoints <= 0)
             {
@@ -472,7 +476,6 @@ namespace SuperAdventure
             }
 
             // Refresh player data in UI
-            lblHitPoints.Text = _player.CurrentHitPoints.ToString();
             UpdateInventoryListInUI();
             UpdatePotionsListInUI();
         }
@@ -483,18 +486,14 @@ namespace SuperAdventure
             rtbMessages.ScrollToCaret();
         }
 
-        private void UpdatePlayerStats()
-        {
-            // Refresh player information and inventory controls
-            lblHitPoints.Text = _player.CurrentHitPoints.ToString();
-            lblGold.Text = _player.Gold.ToString();
-            lblExperience.Text = _player.ExperiencePoints.ToString();
-            lblLevel.Text = _player.Level.ToString();
-        }
-
         private void SuperAdventure_FormClosed(object sender, FormClosedEventArgs e)
         {
             File.WriteAllText(PLAYER_DATA_FILE_NAME, _player.ToXmlString());
+        }
+
+        private void cboWeapons_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _player.CurrentWeapon = (Weapon)cboWeapons.SelectedItem;
         }
     }
 }
