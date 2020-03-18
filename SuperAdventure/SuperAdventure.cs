@@ -205,7 +205,7 @@ namespace SuperAdventure
                 btnSouth.Visible = (_player.CurrentLocation.LocationToSouth != null);
 
                 // Display current location name and description
-                rtbLocation.Text += _player.CurrentLocation.Name + Environment.NewLine;
+                rtbLocation.Text = _player.CurrentLocation.Name + Environment.NewLine;
                 rtbLocation.Text += _player.CurrentLocation.Description + Environment.NewLine;
 
                 if (_player.CurrentLocation.MonsterLivingHere == null)
