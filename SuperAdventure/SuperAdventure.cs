@@ -30,10 +30,9 @@ namespace SuperAdventure
                 _player = Player.CreateDefaultPlayer();
             }
 
-            lblHitPoints.DataBindings.Add("Text", _player, "CurrentHitPoints");
-            lblGold.DataBindings.Add("Text", _player, "Gold");
-            lblExperience.DataBindings.Add("Text", _player, "ExperiencePoints");
-            lblLevel.DataBindings.Add("Text", _player, "Level");
+            BindStatsToUI();
+            BindInventoryDataToUI();
+            BindQuestDataToUI();
 
             MoveTo(_player.CurrentLocation);
 
@@ -190,12 +189,6 @@ namespace SuperAdventure
             }
 
 
-            // Refresh player's inventory list
-            UpdateInventoryListInUI();
-
-            // Refresh player's quest list
-            UpdateQuestListInUI();
-
             // Refresh player's weapons combobox
             UpdateWeaponListInUI();
 
@@ -203,42 +196,56 @@ namespace SuperAdventure
             UpdatePotionsListInUI();
         }
 
-        private void UpdateInventoryListInUI()
+        private void BindStatsToUI()
+        {
+            lblHitPoints.DataBindings.Add("Text", _player, "CurrentHitPoints");
+            lblGold.DataBindings.Add("Text", _player, "Gold");
+            lblExperience.DataBindings.Add("Text", _player, "ExperiencePoints");
+            lblLevel.DataBindings.Add("Text", _player, "Level");
+        }
+
+        private void BindInventoryDataToUI()
         {
             dgvInventory.RowHeadersVisible = false;
+            dgvInventory.AutoGenerateColumns = false;
 
-            dgvInventory.ColumnCount = 2;
-            dgvInventory.Columns[0].Name = "Name";
-            dgvInventory.Columns[0].Width = 197;
-            dgvInventory.Columns[1].Name = "Quantity";
+            dgvInventory.DataSource = _player.Inventory;
 
-            dgvInventory.Rows.Clear();
-
-            foreach (InventoryItem inventoryItem in _player.Inventory)
+            dgvInventory.Columns.Add(new DataGridViewTextBoxColumn
             {
-                if (inventoryItem.Quantity > 0)
-                {
-                    dgvInventory.Rows.Add(new[] { inventoryItem.Details.Name, inventoryItem.Quantity.ToString() });
-                }
-            }
+                HeaderText = "Name",
+                Width = 197,
+                DataPropertyName = "Description"
+            });
+
+            dgvInventory.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity"
+            });
         }
 
-        private void UpdateQuestListInUI()
+        private void BindQuestDataToUI()
         {
             dgvQuests.RowHeadersVisible = false;
+            dgvQuests.AutoGenerateColumns = false;
 
-            dgvQuests.ColumnCount = 2;
-            dgvQuests.Columns[0].Name = "Name";
-            dgvQuests.Columns[0].Width = 197;
-            dgvQuests.Columns[1].Name = "Done?";
+            dgvQuests.DataSource = _player.Quests;
 
-            dgvQuests.Rows.Clear();
-
-            foreach (PlayerQuest playerQuest in _player.Quests)
+            dgvQuests.Columns.Add(new DataGridViewTextBoxColumn
             {
-                dgvQuests.Rows.Add(new[] { playerQuest.Details.Name, playerQuest.IsCompleted.ToString() });
-            }
+                HeaderText = "Name",
+                Width = 197,
+                DataPropertyName = "Name"
+            });
+
+            dgvQuests.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Done?",
+                DataPropertyName = "IsCompleted"
+            });
         }
+
 
         private void UpdateWeaponListInUI()
         {
@@ -385,8 +392,6 @@ namespace SuperAdventure
                     }
                 }
 
-                // Refresh player information and inventory controls
-                UpdateInventoryListInUI();
                 UpdateWeaponListInUI();
                 UpdatePotionsListInUI();
 
@@ -476,7 +481,6 @@ namespace SuperAdventure
             }
 
             // Refresh player data in UI
-            UpdateInventoryListInUI();
             UpdatePotionsListInUI();
         }
 
