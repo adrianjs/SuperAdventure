@@ -149,6 +149,11 @@ namespace SuperAdventure
             _player.UsePotion(potion);
         }
 
+        private void BtnTrade_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void DisplayMessage(object sender, MessageEventArgs messageEventArgs)
         {
             rtbMessages.Text += messageEventArgs.Message + Environment.NewLine;
